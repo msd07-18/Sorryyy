@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💌 For You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:        #ff8fab;
+      --pink-soft:   #ffbdd4;
+      --pink-pale:   #ffe4ef;
+      --lav:         #c7b4f0;
+      --lav-soft:    #e0d5ff;
+      --peach:       #ffd3a8;
+      --text-h:      #c05580;
+      --text-b:      #8a5575;
+      --text-muted:  #b090a8;
+      --glass-bg:    rgba(255,255,255,0.60);
+      --glass-b:     rgba(255,255,255,0.85);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      background: #fff0f8;
+    }
+
+    /* Animated gradient layer */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(135deg,
+        #fff0f8 0%,
+        #f4efff 20%,
+        #fff5ee 40%,
+        #eef8ff 60%,
+        #fff0f8 80%,
+        #f4efff 100%
+      );
+      background-size: 400% 400%;
+      animation: bgDrift 14s ease-in-out infinite;
+    }
+    @keyframes bgDrift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+
+    /* ─── FLOATING PARTICLES ─── */
+    .ptcl {
+      position: fixed;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      will-change: transform, opacity;
+      animation: ptclRise linear infinite both;
+      opacity: 0;
+    }
+    @keyframes ptclRise {
+      0%   { transform: translateY(108vh) rotate(0deg) scale(0.4); opacity: 0; }
+      6%   { opacity: 0.75; }
+      92%  { opacity: 0.5; }
+      100% { transform: translateY(-8vh)  rotate(340deg) scale(0.9); opacity: 0; }
+    }
+
+    /* ─── SCREENS ─── */
+    .scr {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 28px 16px 36px;
+      position: relative;
+      z-index: 1;
+    }
+    .scr.on { display: flex; }
+
+    /* ─── GLASS CARD ─── */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1.5px solid var(--glass-b);
+      border-radius: 28px;
+      padding: 34px 26px;
+      max-width: 410px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 8px 36px rgba(255,140,180,0.22),
+        0 2px 10px rgba(0,0,0,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+      animation: cardIn 0.65s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    /* sheen */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(130deg, rgba(255,255,255,0.25) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    @keyframes cardIn {
+      0%   { opacity: 0; transform: translateY(36px) scale(0.93); }
+      100% { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+
+    /* ─── TYPOGRAPHY ─── */
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.2rem, 5vw, 1.55rem);
+      color: var(--text-h);
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+    .body-txt {
+      font-size: 0.875rem;
+      color: var(--text-b);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .italic-note {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: block;
+    }
+    .divider {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, rgba(255,140,180,0.45), transparent);
+      margin: 14px 0;
+    }
+
+    /* ─── BIG EMOJI ─── */
+    .big-e  { font-size: 2.4rem; display: block; margin-bottom: 10px; }
+    .mega-e { font-size: 3.2rem; display: block; margin: 14px 0; }
+    .heart-row { font-size: 1.3rem; letter-spacing: 6px; display: block; margin: 14px 0; opacity: 0.85; }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 12px 24px;
+      border: none; border-radius: 50px;
+      font-family: 'Poppins', sans-serif; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; outline: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    }
+    .btn:active { transform: scale(0.93) !important; }
+
+    .btn-pink {
+      background: linear-gradient(135deg, #ff8fab, #ffadc5);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(255,143,171,0.45);
+    }
+    .btn-pink:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 24px rgba(255,143,171,0.55); }
+
+    .btn-lav {
+      background: linear-gradient(135deg, #c7b4f0, #d9ccf8);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(199,180,240,0.45);
+    }
+    .btn-lav:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 24px rgba(199,180,240,0.55); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.82);
+      color: var(--text-h);
+      border: 1.5px solid rgba(255,143,171,0.38);
+    }
+    .btn-ghost:hover { background: rgba(255,230,242,0.88); transform: translateY(-2px); }
+
+    .btn-row {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    /* ─── ENVELOPE ─── */
+    .env-wrap {
+      width: 190px; height: 148px;
+      position: relative;
+      margin: 22px auto 26px;
+      cursor: pointer;
+    }
+    .env-inner { animation: envPulse 2.2s ease-in-out infinite; }
+    @keyframes envPulse {
+      0%,100% { transform: scale(1) rotate(-2deg); }
+      50%      { transform: scale(1.05) rotate(2deg); }
+    }
+    .env-inner.stop { animation: none; }
+
+    /* envelope using SVG-free CSS triangles */
+    .env-body {
+      position: absolute; bottom: 0;
+      width: 190px; height: 112px;
+      background: linear-gradient(155deg, #ffd6e8, #ffbdd4);
+      border-radius: 4px 4px 16px 16px;
+      box-shadow: 0 10px 28px rgba(255,150,185,0.42);
+    }
+    .env-tri-left {
+      position: absolute; bottom: 0; left: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 56px 0 56px 95px;
+      border-color: transparent transparent transparent #f0a8c8;
+    }
+    .env-tri-right {
+      position: absolute; bottom: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 56px 95px 56px 0;
+      border-color: transparent #f0a8c8 transparent transparent;
+    }
+    .env-tri-bottom {
+      position: absolute; bottom: 0; left: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 95px 62px 95px;
+      border-color: transparent transparent #e8a0be transparent;
+    }
+    .env-flap {
+      position: absolute; top: 0; left: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 78px 95px 0 95px;
+      border-color: #f5b8d4 transparent transparent transparent;
+      transform-origin: top center;
+      transition: transform 0.75s cubic-bezier(0.68,-0.55,0.27,1.55);
+      z-index: 10;
+    }
+    .env-flap.open { transform: rotateX(185deg); }
+    .env-heart {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-12%);
+      font-size: 2.1rem; z-index: 5;
+      animation: hb 1.3s ease-in-out infinite;
+    }
+    @keyframes hb {
+      0%,100% { transform: translate(-50%,-12%) scale(1); }
+      50%      { transform: translate(-50%,-12%) scale(1.18); }
+    }
+
+    /* ─── LETTER SCROLL BOX ─── */
+    .letter-box {
+      background: rgba(255,248,253,0.88);
+      border: 1px solid rgba(255,182,210,0.28);
+      border-radius: 18px;
+      padding: 20px 17px;
+      margin: 12px 0 6px;
+      max-height: 310px;
+      overflow-y: auto;
+      text-align: left;
+      scrollbar-width: thin;
+      scrollbar-color: #ffb3cc transparent;
+    }
+    .letter-box::-webkit-scrollbar { width: 3px; }
+    .letter-box::-webkit-scrollbar-thumb { background: #ffb3cc; border-radius: 4px; }
+    .letter-box::-webkit-scrollbar-track { background: transparent; }
+    .letter-txt {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: #7a3d60;
+      line-height: 1.95;
+    }
+
+    /* ─── CELEBRATION ─── */
+    .celeb-e {
+      font-size: 3rem;
+      display: block;
+      margin: 6px 0 12px;
+      animation: celebBounce 0.65s ease-in-out infinite alternate;
+    }
+    @keyframes celebBounce {
+      from { transform: scale(1) rotate(-4deg); }
+      to   { transform: scale(1.12) rotate(4deg); }
+    }
+
+    /* ─── VIDEO MODAL ─── */
+    #vidModal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(20,5,25,0.68);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 600;
+      align-items: center; justify-content: center;
+      padding: 18px;
+    }
+    #vidModal.on { display: flex; }
+
+    .modal-box {
+      background: rgba(255,255,255,0.97);
+      border-radius: 26px;
+      padding: 22px 20px 20px;
+      max-width: 410px; width: 100%;
+      position: relative;
+      animation: modalPop 0.42s cubic-bezier(0.34,1.56,0.64,1) both;
+      box-shadow: 0 24px 64px rgba(255,100,150,0.32);
+    }
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.72) translateY(28px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-close {
+      position: absolute; top: 12px; right: 13px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,182,200,0.28); border: none;
+      font-size: 0.88rem; cursor: pointer; color: #c05580;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.22s;
+    }
+    .modal-close:hover { background: rgba(255,100,140,0.22); transform: scale(1.12); }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; color: var(--text-h);
+      text-align: center; margin-bottom: 13px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 16px;
+      max-height: 265px;
+      object-fit: contain;
+      background: #0e0010;
+      display: block;
+    }
+
+    /* Video upload area */
+    .vid-upload {
+      margin-top: 11px;
+      padding: 14px;
+      background: rgba(255,240,250,0.85);
+      border: 2px dashed rgba(255,143,171,0.42);
+      border-radius: 14px;
+      text-align: center;
+    }
+    .vid-upload p { font-size: 0.77rem; color: #b08099; margin-bottom: 8px; line-height: 1.5; }
+    .vid-label {
+      display: inline-block;
+      padding: 9px 20px;
+      background: linear-gradient(135deg, #ff8fab, #ffadc5);
+      color: white; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .vid-label:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,143,171,0.5); }
+    #vidFile { display: none; }
+
+    .modal-btns { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+
+    /* ─── CONFETTI + HEARTS (injected) ─── */
+    @keyframes confettiDrop {
+      0%   { transform: translateY(-30px) rotateZ(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0; }
+    }
+    @keyframes heartRise {
+      0%   { transform: translateY(0) scale(0.4); opacity: 0; }
+      12%  { opacity: 1; }
+      100% { transform: translateY(-105vh) scale(1.1) rotate(22deg); opacity: 0; }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 370px) {
+      .card { padding: 24px 17px; }
+      .env-wrap { width: 160px; height: 124px; }
+      .env-body { width: 160px; height: 94px; }
+      .env-tri-left  { border-width: 47px 0 47px 80px; }
+      .env-tri-right { border-width: 47px 80px 47px 0; }
+      .env-tri-bottom { border-width: 0 80px 52px 80px; }
+      .env-flap { border-width: 65px 80px 0 80px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — OPENING ENVELOPE
+══════════════════════════════════════════ -->
+<div class="scr on" id="s-open">
+  <div class="card">
+    <span class="italic-note">✨ kuch khaas hai tumhare liye… ✨</span>
+
+    <div class="env-wrap" onclick="openEnvelope()">
+      <div class="env-inner" id="envInner">
+        <div class="env-body"></div>
+        <div class="env-tri-left"></div>
+        <div class="env-tri-right"></div>
+        <div class="env-tri-bottom"></div>
+        <div class="env-flap" id="envFlap"></div>
+        <div class="env-heart">💌</div>
+      </div>
+    </div>
+
+    <h1 class="title">Maine kuch banaya hai tumhare liye… 💌</h1>
+    <div class="divider"></div>
+    <p class="body-txt" style="margin-bottom:20px;">Thodi der ke liye please ruko 🥺</p>
+
+    <button class="btn btn-pink" onclick="openEnvelope()">Open this letter 🥺</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — Q1: NARAZ HO?
+══════════════════════════════════════════ -->
+<div class="scr" id="s-q1">
+  <div class="card">
+    <span class="big-e">🥀</span>
+    <h1 class="title">Kya aap apni friend se naraz hain? 🥺</h1>
+    <div class="divider"></div>
+    <span class="italic-note">Seedha bolo… main sun raha hoon 👂🥺</span>
+
+    <div class="btn-row">
+      <button class="btn btn-lav"  onclick="handleQ1('yes')">YES 😤</button>
+      <button class="btn btn-pink" onclick="handleQ1('no')">NO 🥺</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3 — NO PATH: APOLOGY LETTER
+══════════════════════════════════════════ -->
+<div class="scr" id="s-no-letter">
+  <div class="card">
+    <span class="big-e">🫣✨</span>
+    <h1 class="title" style="font-size:1.2rem;">Achhaaa! 🥺</h1>
+
+    <div class="letter-box">
+      <p class="letter-txt">
+        Achaaa toh aap naraz nahi hain… phir bhi ek baar sorry toh banta hai naaa 🥺🫣<br/><br/>
+        Maan leta hoon galti ho gayi meri. Agar meri kisi baat ya harkat se aapko bura laga ho toh genuinely sorryyy 🥀<br/><br/>
+        Aap meri kaafi special friend ho, isliye aapka mujhse gussa hona mujhe bilkul achha nahi lagta 😭<br/><br/>
+        Pleaseee iss baar maaf kar do apne iss innocent se friend ko 🫣🤧<br/><br/>
+        Aur compensation bhi ready hai 👀😂<br/>
+        Shopping karwani ho toh shopping, makeup, clothes, heels — madam ji ki shopping list lekar main khud chalne ko ready hoon 😭🫶🏻😂<br/><br/>
+        Bas aap woh cute wali smile wapas kar do 🥺✨<br/><br/>
+        Ab bataooo… gussa officially khatam hua ya abhi bhi thoda drama baaki hai? 👀😂
+      </p>
+    </div>
+
+    <p class="body-txt" style="margin-top:12px; font-weight:600; color:var(--text-h);">Gussa khatam hua? 👀🥺</p>
+    <div class="btn-row">
+      <button class="btn btn-pink" onclick="handleGussaKhatam('yes')">YESSS 🫶🏻</button>
+      <button class="btn btn-lav"  onclick="handleGussaKhatam('no')">NO 😤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 4 — ANY YES → FIRST CELEBRATION
+══════════════════════════════════════════ -->
+<div class="scr" id="s-forgiven-1">
+  <div class="card">
+    <span class="celeb-e">😭🫶🏻✨</span>
+    <h1 class="title">FINALLYYYY 😭🫶🏻✨</h1>
+    <div class="divider"></div>
+    <p class="body-txt">
+      Thank youuu meri pyaari si friend 🥺🌻<br/>
+      Ab woh gussa wala face hata do 😭🤧<br/>
+      Chocolate pending 🍫👀<br/>
+      Shopping pending 🛍️😂
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-pink" onclick="goSmile()">Ab smile karo 🫣✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 5 — SMILE
+══════════════════════════════════════════ -->
+<div class="scr" id="s-smile">
+  <div class="card">
+    <span class="mega-e">🌻</span>
+    <h1 class="title">Bassss! Ye hui na baat 🥺🫶🏻</h1>
+    <div class="divider"></div>
+    <p class="body-txt">
+      Yahi smile chahiye thi 🥺✨<br/>
+      Aap jab khush rehti hain toh sab theek lagta hai 🌻<br/>
+      Chocolate aur shopping ka promise pakka! 🍫🛍️
+    </p>
+    <span class="heart-row">💗 🌸 💗 🌸 💗</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 6 — AFTER VIDEO QUESTION
+══════════════════════════════════════════ -->
+<div class="scr" id="s-after-video">
+  <div class="card">
+    <span class="big-e">👀🥺</span>
+    <h1 class="title">Ab bataooo… maaf kiyaa kii nahi? 🥺👀</h1>
+    <div class="divider"></div>
+    <span class="italic-note">Dil se bolo 🥺</span>
+    <div class="btn-row">
+      <button class="btn btn-pink" onclick="handleAfterVideo('yes')">MAAF KAR DIYA 🫶🏻</button>
+      <button class="btn btn-lav"  onclick="handleAfterVideo('no')">ABHI THODA GUSSA HAI 😤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 7 — FINAL FORGIVEN (after video)
+══════════════════════════════════════════ -->
+<div class="scr" id="s-forgiven-final">
+  <div class="card">
+    <span class="celeb-e">😭🫶🏻✨</span>
+    <h1 class="title">FINALLYYYY 😭🫶🏻✨</h1>
+    <div class="divider"></div>
+    <p class="body-txt">
+      Thank youuu meri pyaari si friend 🥺🫶🏻<br/>
+      Aapki smile zyada achhi lagti hai 🌻✨<br/>
+      Chocolate pending 🍫<br/>
+      Shopping pending 🛍️😂
+    </p>
+    <span class="heart-row">💗 💝 🌸 💝 💗</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 8 — STILL ANGRY 2
+══════════════════════════════════════════ -->
+<div class="scr" id="s-angry-2">
+  <div class="card">
+    <span class="big-e">😭🥀</span>
+    <h1 class="title" style="font-size:1.15rem;">Acchaaa… abhi bhi gussa ho? 😭🥀</h1>
+
+    <div class="letter-box">
+      <p class="letter-txt">
+        Okayyy samajh gaya 😭🥀<br/><br/>
+        Aap meri friend hain aur aapka aise mujhse gussa rehna mujhe bilkul achha nahi lagtaa 🥺<br/><br/>
+        Baaki maan raha hoon… galti meri hi thi. Genuinely sorry hai 🫶🏻<br/><br/>
+        Aage se koshish karunga ki aisi galti dobara na ho.<br/><br/>
+        Bas iss cute se friend ko ek chance aur de do naaa 🥺🫣<br/><br/>
+        Chocolate bhi dunga 🍫😭<br/>
+        Shopping wala promise bhi pending hai 👀😂<br/><br/>
+        Aapki smile zyada achhi lagti hai… ye gussa wala expression nahi 😭🫣<br/><br/>
+        Please maaf kar do 🥺🫶🏻
+      </p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-pink" onclick="handleAngry2('haan')">HAAN THODAAA 🥺</button>
+      <button class="btn btn-lav"  onclick="handleAngry2('nahi')">NAHI 😤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 9 — HAAN THODA (progress!)
+══════════════════════════════════════════ -->
+<div class="scr" id="s-haan-thoda">
+  <div class="card">
+    <span class="celeb-e" style="font-size:2.4rem;">😭🫶🏻✨</span>
+    <h1 class="title">Yessss progress toh hui 😭🫶🏻✨</h1>
+    <div class="divider"></div>
+    <p class="body-txt">
+      Thodi thodi progress bhi chalegi 🥺<br/>
+      Aage aage aur maafi milegi 🫣😂<br/>
+      Chocolate toh pakka 🍫👀
+    </p>
+    <span class="heart-row">🌸 💗 🌸</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 10 — NAHI PATH
+══════════════════════════════════════════ -->
+<div class="scr" id="s-nahi">
+  <div class="card">
+    <span class="big-e">😭😂🥀</span>
+    <h1 class="title">Okay madam ji… main haar nahi maan raha 😭😂🥀</h1>
+    <div class="divider"></div>
+    <p class="body-txt">Theek hai theek hai… ek last try 🥺🫣</p>
+    <div class="btn-row">
+      <button class="btn btn-pink" onclick="goFinalSorry()">One last sorry 🥺</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 11 — FINAL SORRY
+══════════════════════════════════════════ -->
+<div class="scr" id="s-final-sorry">
+  <div class="card">
+    <span class="big-e">🥺🫶🏻</span>
+    <h1 class="title">Sorryyy 🥺🫶🏻</h1>
+    <div class="divider"></div>
+    <div class="letter-box">
+      <p class="letter-txt">
+        Galti meri thi, aur aapko hurt karna mera intention kabhi nahi tha.<br/><br/>
+        Aage se dhyaan rakhunga.<br/><br/>
+        Bas please apni smile wapas le aao 🌻✨<br/><br/>
+        Chocolate meri taraf se 🍫🥺
+      </p>
+    </div>
+    <span class="heart-row" style="margin-top:14px;">💗 🌻 💗</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIDEO MODAL — "Meri taraf se ek video 🎥🥺"
+══════════════════════════════════════════ -->
+<div id="vidModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    <p class="modal-title">🎥 Meri taraf se… 🥺</p>
+
+    <video id="sorryVid" controls playsinline preload="metadata"></video>
+
+    <div class="vid-upload" id="vidUploadUI">
+      <p>📁 Apna sorry video file yahan load karo<br/>
+      <span style="font-size:0.72rem; opacity:0.7;">(MP4, MOV, WebM — koi bhi format chalega)</span></p>
+      <label class="vid-label" for="vidFile">📂 Video File Choose Karo</label>
+      <input type="file" id="vidFile" accept="video/*" onchange="loadVid(this)"/>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn btn-ghost" style="font-size:0.82rem; padding:9px 18px;" onclick="doneVideo()">
+        Video dekh li 👀
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════ -->
+<script>
+  /* ─── PARTICLES ─── */
+  const PTCL_SET = ['🌸','✨','💗','🌻','⭐','💫','🫧','💕','🌷','🎀'];
+
+  function spawnPtcl() {
+    const el = document.createElement('div');
+    el.className = 'ptcl';
+    el.textContent = PTCL_SET[Math.floor(Math.random() * PTCL_SET.length)];
+    el.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      font-size: ${0.65 + Math.random() * 0.95}rem;
+      animation-duration: ${9 + Math.random() * 13}s;
+      animation-delay: ${Math.random() * 4}s;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 26000);
+  }
+
+  // seed burst
+  for (let i = 0; i < 16; i++) setTimeout(spawnPtcl, i * 350);
+  // keep alive
+  setInterval(spawnPtcl, 2200);
+
+
+  /* ─── SCREEN MANAGER ─── */
+  function show(id) {
+    document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+    const el = document.getElementById(id);
+    el.classList.add('on');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // re-trigger card animation
+    const card = el.querySelector('.card');
+    if (card) {
+      card.style.animation = 'none';
+      void card.offsetWidth; // reflow
+      card.style.animation = '';
+    }
+  }
+
+
+  /* ─── ENVELOPE ─── */
+  let envelopeOpened = false;
+  function openEnvelope() {
+    if (envelopeOpened) return;
+    envelopeOpened = true;
+    const flap  = document.getElementById('envFlap');
+    const inner = document.getElementById('envInner');
+    inner.classList.add('stop');
+    flap.classList.add('open');
+    setTimeout(() => show('s-q1'), 850);
+  }
+
+
+  /* ─── Q1: NARAZ HO? ─── */
+  function handleQ1(ans) {
+    if (ans === 'no') {
+      show('s-no-letter');
+    } else {
+      // YES — she IS angry → go to angry modal, after-video screen waits behind
+      show('s-after-video');
+      setTimeout(() => openAngryModal(), 80);
+    }
+  }
+
+
+  /* ─── NO LETTER PATH: GUSSA KHATAM? ─── */
+  function handleGussaKhatam(ans) {
+    if (ans === 'yes') {
+      confetti();
+      hearts();
+      show('s-forgiven-1');
+    } else {
+      openAngryModal();
+    }
+  }
+
+
+  /* ─── SMILE SCREEN ─── */
+  function goSmile() {
+    hearts();
+    show('s-smile');
+  }
+
+
+  /* ─── AFTER VIDEO ─── */
+  function handleAfterVideo(ans) {
+    if (ans === 'yes') {
+      confetti();
+      hearts();
+      show('s-forgiven-final');
+    } else {
+      show('s-angry-2');
+    }
+  }
+
+
+  /* ─── STILL ANGRY 2 ─── */
+  function handleAngry2(ans) {
+    if (ans === 'haan') {
+      hearts();
+      show('s-haan-thoda');
+    } else {
+      show('s-nahi');
+    }
+  }
+
+
+  /* ─── FINAL SORRY ─── */
+  function goFinalSorry() {
+    show('s-final-sorry');
+  }
+
+
+  /* ─── VIDEO MODAL ─── */
+  function openAngryModal() {
+    document.getElementById('vidModal').classList.add('on');
+  }
+
+  function closeModal() {
+    const v = document.getElementById('sorryVid');
+    v.pause();
+    document.getElementById('vidModal').classList.remove('on');
+  }
+
+  function loadVid(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const v   = document.getElementById('sorryVid');
+    v.src = url;
+    v.load();
+    document.getElementById('vidUploadUI').style.display = 'none';
+  }
+
+  function doneVideo() {
+    closeModal();
+    show('s-after-video');
+  }
+
+  // close modal on overlay click
+  document.getElementById('vidModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+
+  /* ─── CONFETTI ─── */
+  const CONF_COLORS = [
+    '#ff9eb8','#c7b4f0','#ffd700','#a8e6cf',
+    '#87ceeb','#ffb6c1','#dda0dd','#ffc3a0'
+  ];
+
+  function confetti() {
+    for (let i = 0; i < 72; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        const sz = 5 + Math.random() * 9;
+        const dur = 1.8 + Math.random() * 2.2;
+        c.style.cssText = `
+          position: fixed;
+          left: ${Math.random() * 100}vw;
+          top: -25px;
+          width: ${sz}px; height: ${sz}px;
+          background: ${CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)]};
+          border-radius: ${Math.random() > 0.45 ? '50%' : '3px'};
+          z-index: 998;
+          pointer-events: none;
+          animation: confettiDrop ${dur}s ease-in forwards;
+          will-change: transform;
+        `;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), dur * 1000 + 400);
+      }, i * 28);
+    }
+  }
+
+
+  /* ─── HEARTS ─── */
+  const HEART_SET = ['💗','🫶🏻','💖','💝','💕','🌸','✨','🌻'];
+
+  function hearts() {
+    for (let i = 0; i < 24; i++) {
+      setTimeout(() => {
+        const h = document.createElement('div');
+        const dur = 2.2 + Math.random() * 2.4;
+        h.textContent = HEART_SET[Math.floor(Math.random() * HEART_SET.length)];
+        h.style.cssText = `
+          position: fixed;
+          left: ${8 + Math.random() * 84}vw;
+          bottom: -45px;
+          font-size: ${0.95 + Math.random() * 1.55}rem;
+          z-index: 998;
+          pointer-events: none;
+          animation: heartRise ${dur}s ease-out forwards;
+          will-change: transform;
+        `;
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), dur * 1000 + 300);
+      }, i * 75);
+    }
+  }
+</script>
+
+</body>
+</html>
